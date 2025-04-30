@@ -1,0 +1,64 @@
+package cli
+
+import (
+	"database/sql"
+	"strconv"
+	"time"
+
+	_ "github.com/mattn/go-sqlite3"
+)
+
+type Note struct {
+	ID    string
+	Title string
+	Body  string
+}
+
+type Store struct {
+	conn *sql.DB
+}
+
+func (s *Store) Init() error {
+	var err error
+	s.conn, err = sql.Open("sqlite3", "./notes.db")
+	if err != nil {
+		return err
+	}
+	createTableStmt := `CREATE TABLE IF NOT EXISTS notes(
+	id integer not null primary key,
+	title text not null,
+	body text not null);`
+	if _, err = s.conn.Exec(createTableStmt); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Store) GetNotes() ([]Note, error) {
+	id := `SELECT * FROM notes`
+	rows, err := s.conn.Query(id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	notes := []Note{}
+	for rows.Next() {
+		var note Note
+		rows.Scan(&note.ID, &note.Title, &note.Body)
+		notes = append(notes, note)
+	}
+	return notes, nil
+}
+func (s *Store) SaveNote(note Note) error {
+	if note.ID == 0 {
+		note.ID = strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
+	}
+	upsertQuery := `INSERT INTO note (id, title, body)
+	VALUE (?,?,?)
+	ON CONFLICT(id) DO UPDATE
+	SET title=excluded.title, body=excluded.body;`
+	if _, err := s.conn.Exec(upsertQuery, note.ID, note.Title, note.Body); err != nil {
+		return err
+	}
+	return nil
+}
