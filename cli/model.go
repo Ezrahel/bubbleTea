@@ -75,6 +75,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			case "enter":
 				m.currNote = m.notes[m.listIndex]
+				m.textarea.SetValue(m.currNote.Body)
+				m.textarea.Focus()
+				m.textarea.CursorEnd()
+				m.state = bodyView
 				m.state = bodyView
 			}
 		}
