@@ -7,10 +7,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// var mod cli.Model
 func main() {
 	store := &cli.Store{}
-	if err := store.Init(); err != err {
+	if err := store.Init(); err != nil {
 		log.Fatalf("unable to init store: %v", err)
 	}
 	mod := cli.NewModel(store)

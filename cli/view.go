@@ -18,6 +18,17 @@ func (m Model) View() string {
 		-----^^^^^^^^^^^^^NOTES APP------^^^^^^^^^^^^
 		_____________________________________________
 		`) + "\n\n"
+	if m.state == titleView {
+		s += "Note title: \n\n"
+		s += m.textinput.View() + "\n\n"
+		s += faintStyle.Render("enter - save,\n esc - discard")
+	}
+
+	if m.state == bodyView {
+		s += "Note: \n\n"
+		s += m.textarea.View() + "\n\n"
+		s += faintStyle.Render("ctrl+s - save,\n esc - discard")
+	}
 	if m.state == listView {
 		for i, n := range m.notes {
 			prefix := " "
