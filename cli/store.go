@@ -2,14 +2,13 @@ package cli
 
 import (
 	"database/sql"
-	"strconv"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 type Note struct {
-	ID    string
+	ID    int64
 	Title string
 	Body  string
 }
@@ -20,7 +19,7 @@ type Store struct {
 
 func (s *Store) Init() error {
 	var err error
-	s.conn, err = sql.Open("sqlite3", "./notes.db")
+	s.conn, err = sql.Open("sqlite", "./notes.db")
 	if err != nil {
 		return err
 	}
@@ -51,7 +50,7 @@ func (s *Store) GetNotes() ([]Note, error) {
 }
 func (s *Store) SaveNote(note Note) error {
 	if note.ID == 0 {
-		note.ID = strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
+		note.ID = time.Now().UTC().UnixNano()
 	}
 	upsertQuery := `INSERT INTO note (id, title, body)
 	VALUE (?,?,?)
